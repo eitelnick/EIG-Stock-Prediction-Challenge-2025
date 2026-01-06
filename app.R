@@ -10,7 +10,7 @@ final_prices <- c(71.76, 862.34, 150.33, 67.03, 178.59, 62.48, 69.93, 19.22, 68.
 
 ui <- dashboardPage(
   dashboardHeader(
-    title = "EIG CONFIDENTIAL",
+    title = "EIG STOCK PREDICTION CHALLENGE",
     tags$li(class = "dropdown", 
             tags$div(style = "padding: 15px; color: #ffffff; font-family: 'Inter', sans-serif; font-size: 13px;",
                      "CLASSIFICATION: EIG CONFIDENTIAL | FINAL RESULTS | 31 DEC 2025"))
@@ -245,7 +245,6 @@ ui <- dashboardPage(
               fluidRow(
                 box(title = "FINAL RANKINGS", status = "primary", solidHeader = TRUE, width = 12,
                     div(style = 'padding: 15px;', tableOutput("leaderboard")))
-                )
               ),
               fluidRow(
                 tabBox(title = "PERFORMANCE ANALYSIS", width = 12,
@@ -300,6 +299,7 @@ ui <- dashboardPage(
       )
     )
   )
+)
 
 server <- function(input, output, session) {
   stocks_data <- reactive({
@@ -314,11 +314,17 @@ server <- function(input, output, session) {
       mike_eitel = c(31.5, 805, 171.5, 70, 157, 67, 72, 19.25, 81, 300, 55.5, 72.5, 55.25, 532.5, 527.5),
       nick_eitel = c(15.67, 879.57, 192.84, 78.78, 138.20, 72.28, 76.17, 14.22, 75.41, 243.86, 68.49, 55.19, 30.00, 347.14, 518.41)
     ) %>% mutate(
-        dick_pct_diff = (dick_eitel - final_price) / final_price * 100, joe_pct_diff = (joe_eitel - final_price) / final_price * 100,
-        john_pct_diff = (john_eitel - final_price) / final_price * 100, mike_pct_diff = (mike_eitel - final_price) / final_price * 100,
-        nick_pct_diff = (nick_eitel - final_price) / final_price * 100, dick_abs_diff = abs(dick_pct_diff),
-        joe_abs_diff = abs(joe_pct_diff), john_abs_diff = abs(john_pct_diff), mike_abs_diff = abs(mike_pct_diff), nick_abs_diff = abs(nick_pct_diff)
-      )
+        dick_pct_diff = (dick_eitel - final_price) / final_price * 100, 
+        joe_pct_diff = (joe_eitel - final_price) / final_price * 100,
+        john_pct_diff = (john_eitel - final_price) / final_price * 100, 
+        mike_pct_diff = (mike_eitel - final_price) / final_price * 100,
+        nick_pct_diff = (nick_eitel - final_price) / final_price * 100, 
+        dick_abs_diff = abs(dick_pct_diff),
+        joe_abs_diff = abs(joe_pct_diff), 
+        john_abs_diff = abs(john_pct_diff), 
+        mike_abs_diff = abs(mike_pct_diff), 
+        nick_abs_diff = abs(nick_pct_diff)
+    )
   })
   
   generate_timeline_data <- function() {
@@ -332,15 +338,37 @@ server <- function(input, output, session) {
     )
   }
   
-  output$most_bullish_box <- renderValueBox({ df <- stocks_data(); bull_counts <- c(sum(df$dick_pct_diff > 0), sum(df$joe_pct_diff > 0), sum(df$john_pct_diff > 0), sum(df$mike_pct_diff > 0), sum(df$nick_pct_diff > 0)); names(bull_counts) <- c("Dick", "Joe", "John", "Mike", "Nick"); valueBox(names(which.max(bull_counts)), "Most Bullish", icon = icon("arrow-trend-up"), color = "green") })
-  output$most_bearish_box <- renderValueBox({ df <- stocks_data(); bear_counts <- c(sum(df$dick_pct_diff < 0), sum(df$joe_pct_diff < 0), sum(df$john_pct_diff < 0), sum(df$mike_pct_diff < 0), sum(df$nick_pct_diff < 0)); names(bear_counts) <- c("Dick", "Joe", "John", "Mike", "Nick"); valueBox(names(which.max(bear_counts)), "Most Bearish", icon = icon("arrow-trend-down"), color = "red") })
-  output$winner_box <- renderValueBox({ valueBox("John", "WINNER: 17.0% Avg Error", icon = icon("trophy"), color = "yellow") })
+  output$most_bullish_box <- renderValueBox({ 
+    df <- stocks_data()
+    bull_counts <- c(sum(df$dick_pct_diff > 0), sum(df$joe_pct_diff > 0), sum(df$john_pct_diff > 0), sum(df$mike_pct_diff > 0), sum(df$nick_pct_diff > 0))
+    names(bull_counts) <- c("Dick", "Joe", "John", "Mike", "Nick")
+    valueBox(names(which.max(bull_counts)), "Most Bullish", icon = icon("arrow-trend-up"), color = "green") 
+  })
   
-  output$stocks_table <- renderTable({ stocks_data() %>% select(ticker, name, final_price, dick_eitel, joe_eitel, john_eitel, mike_eitel, nick_eitel) %>% mutate(across(where(is.numeric), ~sprintf("$%.2f", .))) %>% rename(Ticker = ticker, Name = name, "Dec 31 Close" = final_price, Dick = dick_eitel, Joe = joe_eitel, John = john_eitel, Mike = mike_eitel, Nick = nick_eitel) }, bordered = TRUE, striped = TRUE, spacing = "s")
+  output$most_bearish_box <- renderValueBox({ 
+    df <- stocks_data()
+    bear_counts <- c(sum(df$dick_pct_diff < 0), sum(df$joe_pct_diff < 0), sum(df$john_pct_diff < 0), sum(df$mike_pct_diff < 0), sum(df$nick_pct_diff < 0))
+    names(bear_counts) <- c("Dick", "Joe", "John", "Mike", "Nick")
+    valueBox(names(which.max(bear_counts)), "Most Bearish", icon = icon("arrow-trend-down"), color = "red") 
+  })
+  
+  output$winner_box <- renderValueBox({ 
+    valueBox("John", "WINNER: 17.0% Avg Error", icon = icon("trophy"), color = "yellow") 
+  })
+  
+  output$stocks_table <- renderTable({ 
+    stocks_data() %>% 
+      select(ticker, name, final_price, dick_eitel, joe_eitel, john_eitel, mike_eitel, nick_eitel) %>% 
+      mutate(across(where(is.numeric), ~sprintf("$%.2f", .))) %>% 
+      rename(Ticker = ticker, Name = name, "Dec 31 Close" = final_price, Dick = dick_eitel, Joe = joe_eitel, John = john_eitel, Mike = mike_eitel, Nick = nick_eitel) 
+  }, bordered = TRUE, striped = TRUE, spacing = "s")
   
   output$predictor_summary <- renderPlot({
     df <- stocks_data()
-    predictor_summary <- df %>% summarize(Dick = mean(dick_abs_diff), Joe = mean(joe_abs_diff), John = mean(john_abs_diff), Mike = mean(mike_abs_diff), Nick = mean(nick_abs_diff)) %>% pivot_longer(cols = everything(), names_to = "predictor", values_to = "accuracy") %>% arrange(accuracy)
+    predictor_summary <- df %>% 
+      summarize(Dick = mean(dick_abs_diff), Joe = mean(joe_abs_diff), John = mean(john_abs_diff), Mike = mean(mike_abs_diff), Nick = mean(nick_abs_diff)) %>% 
+      pivot_longer(cols = everything(), names_to = "predictor", values_to = "accuracy") %>% 
+      arrange(accuracy)
     ggplot(predictor_summary, aes(x = reorder(predictor, accuracy), y = accuracy, fill = predictor)) + 
       geom_col(width = 0.7) + 
       scale_fill_manual(values = c("John" = "#3b82f6", "Mike" = "#8b5cf6", "Nick" = "#06b6d4", "Joe" = "#f59e0b", "Dick" = "#ef4444")) + 
@@ -421,7 +449,17 @@ server <- function(input, output, session) {
   
   output$stock_winners_table <- renderTable({
     df <- stocks_data()
-    stock_winners <- df %>% rowwise() %>% mutate(all_diffs = list(c(Dick = dick_abs_diff, Joe = joe_abs_diff, John = john_abs_diff, Mike = mike_abs_diff, Nick = nick_abs_diff)), best_predictor = names(which.min(all_diffs)), best_accuracy = min(all_diffs)) %>% ungroup() %>% mutate(final_price = sprintf("$%.2f", final_price), best_accuracy = sprintf("%.1f%%", best_accuracy)) %>% select(ticker, name, sector, final_price, best_predictor, best_accuracy) %>% rename(Ticker = ticker, Company = name, Sector = sector, "Dec 31 Price" = final_price, "Best Call" = best_predictor, Error = best_accuracy)
+    stock_winners <- df %>% 
+      rowwise() %>% 
+      mutate(
+        all_diffs = list(c(Dick = dick_abs_diff, Joe = joe_abs_diff, John = john_abs_diff, Mike = mike_abs_diff, Nick = nick_abs_diff)), 
+        best_predictor = names(which.min(all_diffs)), 
+        best_accuracy = min(all_diffs)
+      ) %>% 
+      ungroup() %>% 
+      mutate(final_price = sprintf("$%.2f", final_price), best_accuracy = sprintf("%.1f%%", best_accuracy)) %>% 
+      select(ticker, name, sector, final_price, best_predictor, best_accuracy) %>% 
+      rename(Ticker = ticker, Company = name, Sector = sector, "Dec 31 Price" = final_price, "Best Call" = best_predictor, Error = best_accuracy)
     stock_winners
   }, bordered = TRUE, striped = TRUE, spacing = "s")
   
