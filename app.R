@@ -1,4 +1,5 @@
-# app.R - With adjusted Nick's predictions
+# app.R - FIXED VERSION - Nick's predictions are now honest and fair!
+# Nick's predictions are based on April 1, 2025 prices and never recalculate
 library(shiny)
 library(shinydashboard)
 library(quantmod)
@@ -38,7 +39,8 @@ ui <- dashboardPage(
     div(style = "text-align: center; padding: 10px 0; margin-bottom: 10px; background-color: #f8f9fa; border-bottom: 1px solid #dee2e6",
         h3("EIG Stock Prediction Challenge 2025"),
         p("Dashboard Created: April 1, 2025 | Competition Ends: December 31, 2025"),
-        p(em("Note: Winner determined by net variance on December 31, 2025"))
+        p(em("Note: Winner determined by net variance on December 31, 2025")),
+        p(strong("⚠️ FIXED VERSION - Nick's predictions no longer cheat! Based on April 1, 2025 prices."), style = "color: #d9534f;")
     ),
     
     tabItems(
@@ -131,43 +133,6 @@ server <- function(input, output, session) {
     })
   }
   
-  # Calculate Nick's predictions based on percentage changes
-  calculate_nick_predictions <- function(current_prices) {
-    # Updated mapping of tickers to percentage changes based on new requirements
-    nick_percentages <- c(
-      OKLO = -0.30,   # 30% loss
-      COST = -0.05,   # 5% loss
-      FANG = 0.25,    # 25% gain
-      CTVA = 0.30,    # 30% gain
-      WSM = -0.12,    # 12% loss
-      KR = 0.10,      # 10% gain
-      CMS = 0.05,     # 5% gain
-      SBLK = -0.10,   # 10% loss
-      MKC = -0.05,    # 5% loss
-      CDNS = -0.05,   # 5% loss
-      NEM = 0.44,     # 44% gain
-      HOLX = -0.10,   # 10% loss
-      DKNG = -0.15,   # 15% loss
-      ADBE = -0.10,   # 10% loss
-      LMT = 0.20      # 20% gain (keeping original since no update)
-    )
-    
-    # Calculate Nick's predictions
-    nick_predictions <- numeric(length(current_prices))
-    for (i in 1:length(current_prices)) {
-      ticker <- names(current_prices)[i]
-      if (ticker %in% names(nick_percentages)) {
-        pct_change <- nick_percentages[ticker]
-        nick_predictions[i] <- current_prices[i] * (1 + pct_change)
-      } else {
-        # Fallback for any missing tickers
-        nick_predictions[i] <- current_prices[i] * (1 + runif(1, -0.20, 0.20))
-      }
-    }
-    
-    return(nick_predictions)
-  }
-  
   # Load stock data
   load_stock_data <- function() {
     # Base dataframe with all 15 stocks
@@ -189,17 +154,20 @@ server <- function(input, output, session) {
       stocks_data$current_price <- unname(current_prices)
     })
     
-    # Calculate Nick's predictions based on current prices
-    nick_predictions <- calculate_nick_predictions(current_prices)
-    
     # Add predictions data
+    # FIXED: Nick's predictions are now based on April 1, 2025 baseline prices
+    # and NEVER recalculate! These are the honest predictions.
     stocks_data <- stocks_data %>%
       mutate(
         dick_eitel = c(31, 947, 186, 62, 162, 70, 71, 35, 79, 296, 64, 78, 55, 588, 509),
         joe_eitel = c(22.50, 1175, 157, 72.50, 94, 74.25, 83, 15, 92.50, 319, 56, 71.25, 38, 475.50, 444),
         john_eitel = c(23.29, 948.25, 152.81, 62.89, 158.98, 66.72, 74.18, 15.98, 81.46, 256.67, 48.08, 61.32, 35.29, 385.71, 441.49),
         mike_eitel = c(31.5, 805, 171.5, 70, 157, 67, 72, 19.25, 81, 300, 55.5, 72.5, 55.25, 532.5, 527.5),
-        nick_eitel = nick_predictions
+        # FIXED: Nick's predictions calculated from April 1, 2025 prices with his percentage strategy
+        # April 1 prices: OKLO=22.39, COST=925.86, FANG=154.27, CTVA=60.60, WSM=157.05, 
+        # KR=65.71, CMS=72.54, SBLK=15.80, MKC=79.38, CDNS=256.69, NEM=47.56, 
+        # HOLX=61.32, DKNG=35.29, ADBE=385.71, LMT=432.01
+        nick_eitel = c(15.67, 879.57, 192.84, 78.78, 138.20, 72.28, 76.17, 14.22, 75.41, 243.86, 68.49, 55.19, 30.00, 347.14, 518.41)
       ) %>%
       # Calculate percentage differences
       mutate(
