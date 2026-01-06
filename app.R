@@ -300,7 +300,6 @@ ui <- dashboardPage(
       )
     )
   )
-)
 
 server <- function(input, output, session) {
   stocks_data <- reactive({
